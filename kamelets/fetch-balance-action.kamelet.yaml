@@ -1,0 +1,99 @@
+apiVersion: camel.apache.org/v1
+kind: Kamelet
+metadata:
+  name: fetch-balance-action
+  annotations:
+    camel.apache.org/kamelet.support.level: Preview
+    camel.apache.org/catalog.version: '1.0'
+    camel.apache.org/kamelet.icon: >-
+      data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
+      fill='%23000000' viewBox='0 0 32 32'
+      id='icon'%3E%3Cdefs%3E%3Cstyle%3E.cls-1%7Bfill:none;%7D%3C/style%3E%3C/defs%3E%3Ctitle%3Eapplication%3C/title%3E%3Cpath
+      d='M16,18H6a2,2,0,0,1-2-2V6A2,2,0,0,1,6,4H16a2,2,0,0,1,2,2V16A2,2,0,0,1,16,18ZM6,6V16H16V6Z'
+      transform='translate(0 0)'/%3E%3Cpath
+      d='M26,12v4H22V12h4m0-2H22a2,2,0,0,0-2,2v4a2,2,0,0,0,2,2h4a2,2,0,0,0,2-2V12a2,2,0,0,0-2-2Z'
+      transform='translate(0 0)'/%3E%3Cpath
+      d='M26,22v4H22V22h4m0-2H22a2,2,0,0,0-2,2v4a2,2,0,0,0,2,2h4a2,2,0,0,0,2-2V22a2,2,0,0,0-2-2Z'
+      transform='translate(0 0)'/%3E%3Cpath
+      d='M16,22v4H12V22h4m0-2H12a2,2,0,0,0-2,2v4a2,2,0,0,0,2,2h4a2,2,0,0,0,2-2V22a2,2,0,0,0-2-2Z'
+      transform='translate(0 0)'/%3E%3Cg id='_Transparent_Rectangle_'
+      data-name='&lt;Transparent Rectangle&gt;'%3E%3Crect class='cls-1'
+      width='32' height='32'/%3E%3C/g%3E%3C/svg%3E
+    camel.apache.org/provider: Portx
+    camel.apache.org/kamelet.group: com.portx
+    camel.apache.org/kamelet.namespace: orca
+  labels:
+    camel.apache.org/kamelet.type: action
+spec:
+  definition:
+    title: ORCA Get Balance
+    description: ORCA Get Balance
+    required: []
+    type: object
+    properties:
+      apiHost:
+        title: API Host
+        description: API Host
+        type: string
+        default: portx-oba-proc-api.dev.demobank.tenants.portx.io
+      servicerId:
+        title: Servicer Id
+        description: Servicer Id
+        type: string
+        default: mambu
+        enum:
+          - mambu
+          - csi
+      accountId:
+        title: Account Id
+        description: Account Id
+        type: string
+        default: ${exchangeProperty.accountId}
+      accessToken:
+        title: Access Token
+        description: Access Token
+        type: string
+        default: ${exchangeProperty.accessToken}
+  types:
+    in:
+      mediaType: ''
+    out:
+      mediaType: ''
+  template:
+    route:
+      id: route-4685
+      from:
+        id: from-2782
+        uri: kamelet:source
+        steps:
+          - removeHeaders:
+              id: removeHeaders-dbe6
+              pattern: '*'
+          - setHeader:
+              id: setHeader-d52a
+              description: Camel HTTP Method
+              name: CamelHttpMethod
+              expression:
+                constant:
+                  id: constant-8f90
+                  expression: GET
+          - setHeader:
+              id: setHeader-32eb
+              description: Authorization
+              name: Authorization
+              expression:
+                simple:
+                  id: simple-49dd
+                  expression: Bearer {{accessToken}}
+          - setHeader:
+              id: setHeader-262b
+              description: Servicer Id
+              name: servicerId
+              expression:
+                simple:
+                  id: simple-3423
+                  expression: '{{servicerId}}'
+          - toD:
+              id: toD-1d82
+              uri: >-
+                https://{{apiHost}}/portx-oba-proc-api/1.0/accounts/{{accountId}}/balances

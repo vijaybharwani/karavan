@@ -1,0 +1,76 @@
+apiVersion: camel.apache.org/v1
+kind: Kamelet
+metadata:
+  name: orca-create-person-action
+  annotations:
+    camel.apache.org/kamelet.support.level: Preview
+    camel.apache.org/catalog.version: '1.0'
+    camel.apache.org/kamelet.icon: >-
+      data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSIjMDIxODJCIi8+CjxwYXRoIGQ9Ik0zMS44MTI4IDI0LjI3MjNMMzkuOTQ3NSAxMC41ODQyQzQwLjAxNzUgMTAuNDU5IDQwLjAxNzUgMTAuMzE3MiAzOS45NDc1IDEwLjE5MkMzOS44Njg4IDEwLjA3NTEgMzkuNzM3NiAxMCAzOS41ODg5IDEwSDMzLjgxNThDMzMuNjY3MSAxMCAzMy41MjcyIDEwLjA3NTEgMzMuNDU3MiAxMC4yMDAzTDI1LjM3NDkgMjQuMDgwM0MyNS4zMDUgMjQuMjA1NSAyNS4zMDUgMjQuMzQ3NCAyNS4zODM3IDI0LjQ3MjZMMzMuNjY3MSAzNy45NzdDMzMuNzM3MSAzOC4wOTM4IDMzLjg3NzEgMzguMTY4OSAzNC4wMjU4IDM4LjE2ODlIMzkuNTg4OUMzOS43Mzc2IDM4LjE2ODkgMzkuODY4OCAzOC4wOTM4IDM5Ljk0NzUgMzcuOTY4NkM0MC4wMTc1IDM3Ljg0MzQgNDAuMDE3NSAzNy42OTMyIDM5Ljk0NzUgMzcuNTc2M0wzMS44MTI4IDI0LjI3MjNaIiBmaWxsPSIjNEZDN0U3Ii8+CjxwYXRoIGQ9Ik0xNC41NDYxIDEwLjIwMDNDMTQuNDc2MSAxMC4wNzUxIDE0LjMzNjIgMTAgMTQuMTg3NSAxMEg4LjQxNDQ0QzguMjY1NzQgMTAgOC4xMzQ1MyAxMC4wNzUxIDguMDU1ODEgMTAuMTkyQzcuOTg1ODMgMTAuMzA4OCA3Ljk4NTgzIDEwLjQ1OSA4LjA1NTgxIDEwLjU4NDJMMTYuMTkwNiAyNC4yNzIzTDguMDU1ODEgMzcuNTg0N0M3Ljk4NTgzIDM3LjcwOTkgNy45NzcwOSAzNy44NjAxIDguMDU1ODEgMzcuOTc3QzguMTI1NzkgMzguMTAyMSA4LjI2NTc0IDM4LjE3NzMgOC40MTQ0NCAzOC4xNzczSDEzLjk3NzZDMTQuMTI2MyAzOC4xNzczIDE0LjI1NzUgMzguMTAyMSAxNC4zMzYyIDM3Ljk4NTNMMjIuNjE5NiAyNC40ODA5QzIyLjY4OTYgMjQuMzY0MSAyMi42OTg0IDI0LjIxMzggMjIuNjI4NCAyNC4wODg2TDE0LjU0NjEgMTAuMjAwM1oiIGZpbGw9IiM0RkM3RTciLz4KPC9zdmc+Cg==
+    camel.apache.org/provider: Portx
+    camel.apache.org/kamelet.group: com.portx
+    camel.apache.org/kamelet.namespace: orca
+  labels:
+    camel.apache.org/kamelet.type: action
+spec:
+  definition:
+    title: ORCA Create Person
+    description: Create A New Person
+    required:
+      - accessToken
+      - apiHost
+    type: object
+    properties:
+      apiHost:
+        title: API Host
+        description: API Host
+        type: string
+      accessToken:
+        title: Access Token
+        description: Access Token
+        type: string
+      servicerId:
+        title: Servicer Id
+        description: Servicer Id
+        type: string
+        enum:
+          - mambu
+          - csi
+  types:
+    in:
+      mediaType: ''
+    out:
+      mediaType: ''
+  template:
+    route:
+      id: route-e568
+      from:
+        id: from-bafc
+        uri: kamelet:source
+        steps:
+          - removeHeaders:
+              id: removeHeaders-0b39
+              pattern: '*'
+          - setHeader:
+              description: Authorization
+              name: Authorization
+              expression:
+                simple:
+                  expression: Bearer {{accessToken}}
+          - setHeader:
+              description: Servicer Id
+              name: servicerId
+              expression:
+                simple:
+                  expression: '{{servicerId}}'
+          - setHeader:
+              description: CamelHttpMethod
+              name: CamelHttpMethod
+              expression:
+                constant:
+                  expression: POST
+          - to:
+              id: to-d76a
+              uri: https
+              parameters:
+                httpUri: '{{apiHost}}/portx-oba-proc-api/1.0/persons'
