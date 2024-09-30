@@ -1,7 +1,7 @@
 apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
-  name: orca-get-person-by-name-action
+  name: orca-management-cancel-standing-order-action
   annotations:
     camel.apache.org/kamelet.support.level: Preview
     camel.apache.org/catalog.version: '1.0'
@@ -14,73 +14,62 @@ metadata:
     camel.apache.org/kamelet.type: action
 spec:
   definition:
-    title: ORCA Get Person By Name
-    description: Get Person by Name
-    required:
-      - firstName
-      - accessToken
-      - lastName
-      - apiHost
-    type: object
-    properties:
-      firstName:
-        title: First Name
-        description: First Name
-        type: string
-      lastName:
-        title: Last Name
-        description: Last Name
-        type: string
-      apiHost:
-        title: API Host
-        description: API Host
-        type: string
-      accessToken:
-        title: Access Token
-        description: Access token
-        type: string
-      servicerId:
-        title: Servicer Id
-        description: Servicer Id
-        type: string
-        default: mambu
-        enum:
-          - mambu
-          - csi
-  types:
-    in:
-      mediaType: ''
-    out:
-      mediaType: ''
+    title: Cancel Standing Order
+    description: Request Standing Order Cancellation
   template:
     route:
-      id: route-cdc5
+      id: route-240e
       from:
-        id: from-736b
+        id: from-add7
         uri: kamelet:source
         steps:
           - removeHeaders:
-              id: removeHeaders-9481
+              id: removeHeaders-30fd
               pattern: '*'
-          - setHeader:
-              description: Authorization
-              name: Authorization
+          - setBody:
+              id: setBody-1119
               expression:
                 simple:
-                  expression: Bearer {{accessToken}}
+                  id: simple-b902
+                  expression: '{{requestBody}}'
           - setHeader:
-              description: Servicer Id
+              id: setHeader-dd8c
+              name: idempotencyId
+              expression:
+                simple:
+                  id: simple-ded8
+                  expression: '{{idempotencyId}}'
+          - setHeader:
+              id: setHeader-3701
               name: servicerId
               expression:
                 simple:
+                  id: simple-2dee
                   expression: '{{servicerId}}'
           - setHeader:
-              description: CamelHttpMethod
+              id: setHeader-a2b8
+              name: servicerBranchId
+              expression:
+                simple:
+                  id: simple-663e
+                  expression: '{{servicerBranchId}}'
+          - setHeader:
+              id: setHeader-08e9
+              name: Authentication
+              expression:
+                simple:
+                  id: simple-2e46
+                  expression: '{{Authentication}}'
+          - setHeader:
+              id: setHeader-16e8
               name: CamelHttpMethod
               expression:
                 constant:
-                  expression: GET
+                  id: constant-52a7
+                  expression: POST
           - toD:
-              id: toD-345b
-              uri: >-
-                {{apiHost}}/portx-oba-proc-api/1.0/persons?firstName.eq={{firstName}}&lastName.eq={{lastName}}
+              id: toD-22d1
+              uri: '{{apiProtocol}}'
+              parameters:
+                httpUri: >-
+                  {{apiHost}}:{{apiPort}}/open-banking-accounts/1.0/accounts/{{accountId}}/standing-orders/{{standingOrderId}}/cancellation
